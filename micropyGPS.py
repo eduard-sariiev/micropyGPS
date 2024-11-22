@@ -826,5 +826,29 @@ class MicropyGPS(object):
                            'GNGSA': gpgsa,
                           }
 
+    def encode(self):
+        """
+        DDMMMMMDDMMMMMIEEAAAOO
+        D = degrees (lat/long)
+        M = minutes (lat/long)
+        I = direction
+        EE = speed (km/h)
+        A = altitude
+        O = Dilution of Precision (summed for all axis)
+        """
+        gps_lat = ('{degree:0>2}{min:0>5}'.format(degree=hex(self.latitude[0])[2:], min=hex(int(self.latitude[1]*10000))[2:]))
+        gps_long = ('{degree:0>2}{min:0>5}'.format(degree=hex(self.longitude[0])[2:], min=hex(int(self.longitude[1]*10000))[2:]))
+        direction = int('{}{}'.format(int(self.latitude[2] == 'N'), int(self.longitude[2] == 'E')), 2)
+        speed = hex(int(self.speed[2]))[2:]
+        alt = hex(int(self.altitude))[2:]
+        dop = hex(int((self.hdop+self.vdop+self.pdop)*16))[2:]
+        """
+        0x00 S W
+        0x01 S E
+        0x02 N W
+        0x03 N E
+        """
+        return '{}{}{}{:0>2}{:0>3}{:0>2}'.format(gps_lat, gps_long, direction, speed, alt, dop)
+
 if __name__ == "__main__":
     pass
